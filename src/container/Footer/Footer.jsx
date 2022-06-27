@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // import { images } from "../../constants";
 import { AppWrap, MotionWrap } from "../../wrapper";
@@ -12,34 +12,54 @@ const Footer = () => {
     email: "",
     message: "",
   });
+  const [formError, setFormError] = useState({});
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const { username, email, message } = formData;
 
   const handleChangeInput = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     setLoading(true);
+    setFormError(formvalidation(formData));
+  };
 
-    const contact = {
+  const formvalidation = (value) => {
+    const errors = {};
+    if (!value.email) {
+      errors.email = "Please Enter Your Email";
+    }
+    // else{const error=document.getElementsByName("error");
+  // error.classList.toggle("display_none")}
+    try{
+    if ((errors.email.length) !== 0) {
+      setLoading(false);
+    } 
+  }
+    catch{
+      const contact = {
       _type: "contact",
-      name: formData.username,
+      name: formData.name,
       email: formData.email,
       message: formData.message,
     };
+    
+    setIsFormSubmitted(true);
 
     client
       .create(contact)
       .then(() => {
-        setLoading(false);
-        setIsFormSubmitted(true);
-      })
-      .catch((err) => console.log(err));
+        setLoading(true);
+      })};
+    return errors;
   };
+
+  // useEffect(() => {
+  //   console.log(FormData);
+  // }, [formError, formData, isFormSubmitted]);
 
   return (
     <>
@@ -57,33 +77,33 @@ const Footer = () => {
                     className="p-text"
                     type="text"
                     placeholder="Your Name"
-                    name="username"
-                    value={username}
-                    required="required"
+                    name="name"
+                    value={formData.name}
                     onChange={handleChangeInput}
                   />
                 </div>
-                <div className="app__flex">
+                <div className="app__flex email__flex">
                   <input
                     className="p-text"
                     type="email"
                     placeholder="Your Email"
                     name="email"
-                    value={email}
+                    value={formData.email}
                     onChange={handleChangeInput}
                   />
+                  <span className="error display_none">{formError.email}</span>
                 </div>
                 <div>
                   <textarea
                     className="p-text"
                     placeholder="Your Message"
-                    value={message}
+                    value={formData.message}
                     name="message"
                     onChange={handleChangeInput}
                   />
                 </div>
-                <button type="submit" className="p-text" onClick={handleSubmit}>
-                  {!loading ? "Send Message" : "Sending..."}
+                <button className="p-text">
+                  {loading ? "Sending..." : "Send Message"}
                 </button>
               </form>
             </div>
